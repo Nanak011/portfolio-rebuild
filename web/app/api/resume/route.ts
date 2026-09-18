@@ -1,6 +1,7 @@
 import { createAdminSupabase } from "@/lib/supabase/admin";
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
 // Public route — no auth required. Uses the admin client ONLY to look up
 // which file is current and generate a short-lived signed URL; it never
 // exposes write access or any other table to the visitor.
