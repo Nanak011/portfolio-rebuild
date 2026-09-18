@@ -1,0 +1,487 @@
+@font-face {
+  font-family: "Departure Mono";
+  src: url("../fonts/DepartureMono-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --bg: #eeeeea;
+  --panel: #f6f6f2;
+  --ink: #201f1a;
+  --muted: #77776b;
+  --line: #201f1a;
+  --line-soft: #b9b9ab;
+  --max-width: 900px;
+  --font-mono: "Departure Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  -webkit-font-smoothing: antialiased;
+}
+
+.display {
+  font-family: var(--font-mono);
+}
+
+a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--line-soft);
+  text-underline-offset: 3px;
+}
+a:hover {
+  text-decoration-color: var(--ink);
+}
+
+.page {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 32px 24px 80px;
+}
+
+/* ---------- HUD top bar ---------- */
+.hud-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 10px 0 24px;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+.ticks {
+  display: flex;
+  gap: 5px;
+}
+.ticks span {
+  width: 1px;
+  height: 12px;
+  background: var(--line-soft);
+}
+.hud-title {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  letter-spacing: 0.25em;
+  color: var(--ink);
+}
+
+/* ---------- hero: instrument panel ---------- */
+.hero {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 32px;
+  align-items: center;
+  padding: 12px 0 40px;
+  border-bottom: 1px solid var(--line-soft);
+}
+@media (min-width: 720px) {
+  .hero {
+    grid-template-columns: 1.1fr 0.9fr;
+  }
+}
+
+.hero-name {
+  font-family: var(--font-mono);
+  font-size: clamp(1.6rem, 5vw, 2.4rem);
+  line-height: 1.3;
+  margin: 0;
+}
+.hero-role {
+  color: var(--muted);
+  font-size: 0.8rem;
+  margin-top: 10px;
+}
+.hero-summary {
+  margin-top: 20px;
+  max-width: 56ch;
+  line-height: 1.75;
+  font-size: 0.9rem;
+}
+
+.chip-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 26px;
+  flex-wrap: wrap;
+}
+.chip {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  padding: 10px 16px;
+  border: 1px solid var(--ink);
+  text-decoration: none;
+  color: var(--ink);
+  background: var(--bg);
+}
+.chip.solid {
+  background: var(--ink);
+  color: var(--bg);
+}
+.chip:hover {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+/* radar instrument */
+.radar-wrap {
+  display: flex;
+  justify-content: center;
+}
+.readout-box {
+  font-size: 0.65rem;
+  line-height: 1.6;
+  color: var(--ink);
+}
+.readout-box .k {
+  color: var(--muted);
+}
+
+/* ---------- section framing ---------- */
+.section {
+  margin-top: 48px;
+}
+.section-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.15em;
+  color: var(--muted);
+  margin-bottom: 22px;
+}
+.section-label .rule {
+  flex: 1;
+  height: 1px;
+  background: var(--line-soft);
+}
+
+/* ---------- clean manifest table (compact overview, board-style) ---------- */
+.manifest {
+  border: 1px solid var(--ink);
+  margin-bottom: 40px;
+}
+.manifest-row {
+  display: grid;
+  grid-template-columns: 1.3fr 1.6fr 1fr;
+  border-bottom: 1px solid var(--line-soft);
+}
+.manifest-row:last-child {
+  border-bottom: none;
+}
+.manifest-row > div {
+  padding: 10px 14px;
+  border-right: 1px solid var(--line-soft);
+  font-size: 0.78rem;
+}
+.manifest-row > div:last-child {
+  border-right: none;
+}
+.manifest-head {
+  background: var(--ink);
+  color: var(--bg);
+}
+.manifest-head > div {
+  border-right: 1px solid var(--bg);
+  opacity: 0.85;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+}
+.manifest-row:not(.manifest-head):hover {
+  background: #e2e2da;
+}
+
+/* ---------- log-style entries ---------- */
+.entry {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+.entry-index {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--muted);
+  padding-top: 2px;
+}
+.entry-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: baseline;
+}
+.entry-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+.entry-role {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin-top: 2px;
+}
+.entry-date {
+  font-size: 0.72rem;
+  color: var(--muted);
+  white-space: nowrap;
+  font-family: var(--font-mono);
+}
+.entry ul {
+  margin: 12px 0 0;
+  padding-left: 18px;
+  font-size: 0.87rem;
+  line-height: 1.65;
+}
+.entry li {
+  margin-bottom: 6px;
+}
+
+/* ---------- recon tree (expandable skill/usage explorer) ---------- */
+.tree {
+  font-size: 0.85rem;
+}
+.tree-node {
+  margin-bottom: 2px;
+}
+.tree-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 6px 4px;
+  text-align: left;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+.tree-row:hover {
+  background: #e2e2da;
+  color: var(--ink);
+}
+.tree-root {
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding-left: 4px;
+  margin-bottom: 4px;
+}
+.tree-toggle {
+  color: var(--muted);
+  width: 22px;
+  flex: none;
+}
+.tree-branch {
+  color: var(--line-soft);
+  white-space: pre;
+  flex: none;
+}
+.tree-label {
+  flex: 1;
+}
+.tree-label.root {
+  flex: none;
+}
+.tree-count {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+.tree-hint {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-style: italic;
+}
+.tree-children {
+  margin-left: 26px;
+  border-left: 1px solid var(--line-soft);
+  padding-left: 4px;
+}
+.tree-leaf {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 4px;
+  font-size: 0.8rem;
+  text-decoration: none;
+  color: var(--ink);
+}
+.tree-leaf:hover {
+  background: #e2e2da;
+}
+.tree-leaf-label {
+  color: var(--muted);
+}
+a.tree-leaf:hover .tree-leaf-label {
+  color: var(--ink);
+}
+
+/* ---------- gauge groups (now just labeled tag clusters, no fake %) ---------- */
+.gauge-group {
+  margin-bottom: 22px;
+}
+.gauge-label {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+.gauge-row {
+  display: grid;
+  grid-template-columns: 1fr 40px;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+  font-size: 0.78rem;
+}
+.gauge-track {
+  height: 9px;
+  border: 1px solid var(--ink);
+  background: var(--bg);
+  position: relative;
+}
+.gauge-fill {
+  position: absolute;
+  inset: 0;
+  background: var(--ink);
+}
+.gauge-name {
+  grid-column: 1 / -1;
+  font-size: 0.78rem;
+  margin-bottom: 4px;
+}
+.gauge-num {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  text-align: right;
+  color: var(--muted);
+}
+
+/* ---------- project grid with technical icons ---------- */
+.project-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1px;
+  border: 1px solid var(--line);
+}
+.project-card {
+  background: var(--bg);
+  border: 1px solid var(--line-soft);
+  padding: 24px;
+}
+.project-icon {
+  width: 44px;
+  height: 44px;
+  margin-bottom: 14px;
+}
+.project-icon svg {
+  width: 100%;
+  height: 100%;
+  stroke: var(--ink);
+  fill: none;
+  stroke-width: 1;
+}
+.project-card h3 {
+  font-size: 0.95rem;
+  margin: 0 0 10px;
+  font-weight: 700;
+}
+.project-card p {
+  font-size: 0.83rem;
+  color: var(--muted);
+  line-height: 1.6;
+  margin: 0 0 14px;
+}
+
+.tag {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-family: var(--font-mono);
+  border: 1px solid var(--ink);
+  padding: 3px 8px;
+  margin: 0 6px 6px 0;
+  color: var(--ink);
+}
+.tag.solid {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+h1,
+h2,
+h3 {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* ---------- footer classification strip ---------- */
+.footer-strip {
+  margin-top: 64px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line-soft);
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  font-size: 0.68rem;
+  color: var(--muted);
+}
+.footer-strip b {
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-weight: 400;
+}
+
+/* ---------- panel (used on project detail) ---------- */
+.panel {
+  border: 1px solid var(--line-soft);
+  padding: 32px 28px;
+}
+
+/* ---------- forms / admin ---------- */
+button,
+input,
+textarea {
+  font-family: var(--font-mono), monospace;
+  background: var(--bg);
+  color: var(--ink);
+  border: 1px solid var(--ink);
+  padding: 8px 10px;
+  font-size: 0.85rem;
+}
+button {
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+}
+button:hover {
+  background: var(--ink);
+  color: var(--bg);
+}
+form label {
+  display: block;
+  margin-top: 14px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+form input,
+form textarea {
+  width: 100%;
+  margin-top: 4px;
+}
+nav a {
+  text-decoration: none;
+  font-size: 0.8rem;
+}
