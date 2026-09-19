@@ -2,6 +2,7 @@ import { createAdminSupabase } from "@/lib/supabase/admin";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 // Public route — no auth required. Uses the admin client ONLY to look up
 // which file is current and generate a short-lived signed URL; it never
 // exposes write access or any other table to the visitor.
@@ -21,21 +22,23 @@ export async function GET() {
     );
   }
 
-  const { data: signed, error: signError } = await supabase.storage
+  const { data: pdf, error: downloadError } = await supabase.storage
     .from("resumes")
-    .createSignedUrl(current.storage_path, 300); // 5-minute window — avoids expiry races over slow connections
+    .download(current.storage_path);
 
-  if (signError || !signed) {
+  if (downloadError || !pdf) {
     return NextResponse.json(
-      { error: "Could not create download link." },
+      { error: "Could not download the current resume." },
       { status: 500 }
     );
   }
 
-  return NextResponse.redirect(signed.signedUrl, {
+  return new NextResponse(pdf, {
+    status: 200,
     headers: {
-      "Cache-Control": "private, no-store, no-cache, max-age=0, must-revalidate",
-      Expires: "0",
+      "Content-Type": "application/pdf",
+      "Content-Disposition": 'inline; filename="resume.pdf"',
+      "Cache-Control": "private, no-store, max-age=0, must-revalidate",
     },
   });
 }
