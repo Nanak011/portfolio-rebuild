@@ -98,6 +98,11 @@ export default function AdminResumePage() {
   const [selCerts, setSelCerts] = useState<string[]>([]);
   const [selEntries, setSelEntries] = useState<string[]>([]);
 
+  const [uploadLabel, setUploadLabel] = useState("");
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadMessage, setUploadMessage] = useState<string | null>(null);
+
   async function load() {
     setLoading(true);
     const res = await fetch("/api/admin/resume-generations");
@@ -223,6 +228,27 @@ export default function AdminResumePage() {
     }
     setMessage("Generated successfully.");
     setLabel("");
+    load();
+  }
+
+  async function handleUpload() {
+    if (!uploadFile) return;
+    setUploading(true);
+    setUploadMessage(null);
+    const formData = new FormData();
+    formData.append("file", uploadFile);
+    if (uploadLabel) formData.append("label", uploadLabel);
+
+    const res = await fetch("/api/admin/upload-resume", { method: "POST", body: formData });
+    const json = await res.json();
+    setUploading(false);
+    if (!res.ok) {
+      setUploadMessage(`Error: ${json.error}`);
+      return;
+    }
+    setUploadMessage("Uploaded successfully.");
+    setUploadLabel("");
+    setUploadFile(null);
     load();
   }
 
@@ -360,6 +386,31 @@ export default function AdminResumePage() {
           {generating ? "Compiling with tectonic..." : "Generate PDF"}
         </button>
         {message && <p className="muted">{message}</p>}
+      </div>
+
+      <div className="section" style={{ borderTop: "1px solid var(--line-soft)", paddingTop: 20 }}>
+        <h2 style={{ marginTop: 0 }}>Or upload a PDF directly</h2>
+        <p className="muted" style={{ fontSize: "0.85rem" }}>
+          Skip generation entirely — upload a resume you made elsewhere. It's added to the history
+          below just like a generated one; you still need to click "set as current" for it to
+          become the one visitors download.
+        </p>
+        <label>
+          Label (optional)
+          <input value={uploadLabel} onChange={(e) => setUploadLabel(e.target.value)} />
+        </label>
+        <label>
+          PDF file
+          <input
+            type="file"
+            accept="application/pdf"
+            onChange={(e) => setUploadFile(e.target.files?.[0] ?? null)}
+          />
+        </label>
+        <button onClick={handleUpload} disabled={uploading || !uploadFile} style={{ marginTop: 12 }}>
+          {uploading ? "Uploading..." : "Upload PDF"}
+        </button>
+        {uploadMessage && <p className="muted">{uploadMessage}</p>}
       </div>
 
       <h2>History (rolling window of 10)</h2>

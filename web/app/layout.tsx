@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import BinaryClock from "@/components/BinaryClock";
 
 export const metadata: Metadata = {
-  title: "Gurunanak Adhikari - Portfolio",
+  title: "Gurunanak Adhikari — Portfolio",
   description: "Cybersecurity projects, experience, and resume.",
 };
 
@@ -13,7 +14,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        {children}
+        <BinaryClock />
+      </body>
     </html>
   );
 }
