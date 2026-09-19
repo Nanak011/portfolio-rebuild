@@ -32,5 +32,10 @@ export async function GET() {
     );
   }
 
-  return NextResponse.redirect(signed.signedUrl);
+  return NextResponse.redirect(signed.signedUrl, {
+    headers: {
+      "Cache-Control": "private, no-store, no-cache, max-age=0, must-revalidate",
+      Expires: "0",
+    },
+  });
 }

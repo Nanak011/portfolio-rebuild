@@ -3,7 +3,7 @@ import "./globals.css";
 import BinaryClock from "@/components/BinaryClock";
 
 export const metadata: Metadata = {
-  title: "Gurunanak Adhikari — Portfolio",
+  title: "Gurunanak Adhikari - Portfolio",
   description: "Cybersecurity projects, experience, and resume.",
 };
 
