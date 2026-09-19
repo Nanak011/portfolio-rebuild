@@ -34,9 +34,18 @@ export default async function ProjectsPage() {
             const Icon = ICON_MAP[p.icon] ?? ShieldIcon;
             return (
               <div key={p.id} className="project-card">
-                <div className="project-icon">
+                {/* <div className="project-icon">
                   <Icon />
+                </div> */}
+
+                <div className="project-icon">
+                  {p.custom_icon_url ? (
+                    <img src={p.custom_icon_url} alt="" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+                  ) : (
+                    <Icon />
+                  )}
                 </div>
+                
                 <h3>
                   <Link href={`/projects/${p.slug}`}>{p.title}</Link>
                 </h3>

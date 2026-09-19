@@ -11,6 +11,7 @@ type ExperienceItem = {
   employment_type: string | null;
   start_date: string | null;
   end_date: string | null;
+  include_in_resume: boolean;
   sort_order: number;
   experience_bullets?: Bullet[];
   experience_skills?: { skill_id: string }[];
@@ -25,6 +26,7 @@ const emptyForm = {
   employment_type: "",
   start_date: "",
   end_date: "",
+  include_in_resume: true,
   sort_order: 0,
   skill_ids: [] as string[],
 };
@@ -65,6 +67,7 @@ export default function AdminExperiencePage() {
       start_date: item.start_date ?? "",
       end_date: item.end_date ?? "",
       sort_order: item.sort_order,
+      include_in_resume: item.include_in_resume,
       skill_ids: (item.experience_skills ?? []).map((s) => s.skill_id),
     });
   }
@@ -160,6 +163,15 @@ export default function AdminExperiencePage() {
             End date (leave blank if current)
             <input type="date" value={form.end_date} onChange={(e) => setForm({ ...form, end_date: e.target.value })} />
           </label>
+          <label>
+            <input
+              type="checkbox"
+              checked={form.include_in_resume}
+              onChange={(e) => setForm({ ...form, include_in_resume: e.target.checked })}
+              style={{ width: "auto", marginRight: 8 }}
+            />
+            Include in resume PDF
+          </label>
 
           <div className="section">
             <div className="muted" style={{ fontSize: "0.8rem", marginBottom: 8 }}>
@@ -203,6 +215,7 @@ export default function AdminExperiencePage() {
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               <div>
                 <strong>{item.company}</strong>
+                {!item.include_in_resume && <span className="tag" style={{ marginLeft: 8 }}>excluded from resume</span>}
                 <div className="muted">{item.role_title}</div>
               </div>
               <div>

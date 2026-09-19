@@ -48,13 +48,30 @@ export function LockIcon() {
   );
 }
 
+// export function OpenLockIcon() {
+//   return (
+//     <svg viewBox="0 0 48 48">
+//       <rect x="10" y="22" width="28" height="20" rx="1" />
+//       <path d="M16 22 V14 a8 8 0 0 1 16 0" />
+//       <circle cx="24" cy="30" r="2.5" />
+//       <path d="M24 32.5 V37" />
+//     </svg>
+//   );
+// }
+
+
 export function OpenLockIcon() {
   return (
-    <svg viewBox="0 0 48 48">
-      <rect x="10" y="22" width="28" height="20" rx="1" />
-      <path d="M16 22 V14 a8 8 0 0 1 16 0" />
-      <circle cx="24" cy="30" r="2.5" />
-      <path d="M24 32.5 V37" />
+    <svg 
+      viewBox="0 0 48 48" >
+      <rect x="18" y="22" width="25" height="20" rx="1" />
+      
+      <path d="M5 22 V14 a9 9 0 0 1 18 0 v8" />
+      
+      <circle cx="30.5" cy="30" r="2.5" />
+      <path d="M30.5 32.5 V37" />
     </svg>
   );
 }
+
+

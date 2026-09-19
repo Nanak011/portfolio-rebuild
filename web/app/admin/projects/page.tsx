@@ -14,6 +14,8 @@ type Project = {
   what_came_of_it: string;
   repo_url: string | null;
   demo_url: string | null;
+  include_in_resume: boolean;
+  custom_icon_url: string | null;
   sort_order: number;
   project_tags?: { tag: string }[];
   project_skills?: { skill_id: string }[];
@@ -37,6 +39,7 @@ const emptyForm = {
   sort_order: 0,
   tags: "",
   skill_ids: [] as string[],
+  include_in_resume: true,
 };
 
 export default function AdminProjectsPage() {
@@ -48,6 +51,25 @@ export default function AdminProjectsPage() {
   const [saving, setSaving] = useState(false);
   const [newLink, setNewLink] = useState({ label: "", url: "" });
   const [linkingProjectId, setLinkingProjectId] = useState<string | null>(null);
+  const [uploadingIcon, setUploadingIcon] = useState(false);
+
+  async function handleIconUpload(projectId: string, file: File | null) {
+    if (!file) return;
+    setUploadingIcon(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    await fetch(`/api/admin/projects/${projectId}/icon`, {
+      method: "POST",
+      body: formData,
+    });
+    setUploadingIcon(false);
+    load();
+  }
+
+  async function handleRemoveIcon(projectId: string) {
+    await fetch(`/api/admin/projects/${projectId}/icon`, { method: "DELETE" });
+    load();
+  }
 
   async function load() {
     setLoading(true);
@@ -81,6 +103,7 @@ export default function AdminProjectsPage() {
       sort_order: p.sort_order,
       tags: (p.project_tags ?? []).map((t) => t.tag).join(", "),
       skill_ids: (p.project_skills ?? []).map((s) => s.skill_id),
+      include_in_resume: p.include_in_resume,
     });
   }
 
@@ -169,7 +192,7 @@ export default function AdminProjectsPage() {
             />
           </label>
           <label>
-            Icon
+            Icon (preset — used unless a custom icon is uploaded below)
             <select
               value={form.icon}
               onChange={(e) => setForm({ ...form, icon: e.target.value })}
@@ -181,6 +204,32 @@ export default function AdminProjectsPage() {
               ))}
             </select>
           </label>
+
+          {editingId !== "new" && (
+            <div className="section">
+              <div className="muted" style={{ fontSize: "0.8rem", marginBottom: 8 }}>
+                Custom icon image (overrides the preset above):
+              </div>
+              {projects.find((p) => p.id === editingId)?.custom_icon_url && (
+                <img
+                  src={projects.find((p) => p.id === editingId)?.custom_icon_url ?? ""}
+                  alt=""
+                  style={{ width: 40, height: 40, marginBottom: 8 }}
+                />
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleIconUpload(editingId, e.target.files?.[0] ?? null)}
+              />
+              {uploadingIcon && <span className="muted"> uploading...</span>}
+              <div style={{ marginTop: 8 }}>
+                <button type="button" onClick={() => handleRemoveIcon(editingId)}>
+                  remove custom icon
+                </button>
+              </div>
+            </div>
+          )}
           <label>
             Tags (comma-separated — e.g. "AWS, Lambda, WAF")
             <input
@@ -196,6 +245,15 @@ export default function AdminProjectsPage() {
               style={{ width: "auto", marginRight: 8 }}
             />
             Flagship project
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              checked={form.include_in_resume}
+              onChange={(e) => setForm({ ...form, include_in_resume: e.target.checked })}
+              style={{ width: "auto", marginRight: 8 }}
+            />
+            Include in resume PDF
           </label>
           <label>
             Problem
@@ -279,6 +337,7 @@ export default function AdminProjectsPage() {
         projects.map((p) => (
           <div key={p.id} className="project-card">
             <strong>{p.title}</strong> <span className="muted">/{p.slug} — icon: {p.icon}</span>
+            {!p.include_in_resume && <span className="tag" style={{ marginLeft: 8 }}>excluded from resume</span>}
             <div className="muted" style={{ marginTop: 6 }}>
               {(p.project_tags ?? []).map((t) => t.tag).join(", ") || "no tags"}
             </div>

@@ -61,6 +61,7 @@ export async function POST(req: NextRequest) {
       what_came_of_it: body.what_came_of_it,
       repo_url: body.repo_url ?? null,
       demo_url: body.demo_url ?? null,
+      include_in_resume: body.include_in_resume ?? true,  
       sort_order: body.sort_order ?? 0,
     })
     .select()

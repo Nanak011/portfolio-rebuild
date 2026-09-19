@@ -10,8 +10,12 @@ type Education = {
   start_date: string | null;
   end_date: string | null;
   is_expected: boolean;
+  include_in_resume: boolean;
   sort_order: number;
+  education_skills?: { skill_id: string }[];
 };
+type Skill = { id: string; name: string };
+type SkillGroup = { id: string; label: string; skills: Skill[] };
 
 const emptyForm = {
   institution: "",
@@ -20,11 +24,14 @@ const emptyForm = {
   start_date: "",
   end_date: "",
   is_expected: false,
+  include_in_resume: true,
   sort_order: 0,
+  skill_ids: [] as string[],
 };
 
 export default function AdminEducationPage() {
   const [items, setItems] = useState<Education[]>([]);
+  const [skillGroups, setSkillGroups] = useState<SkillGroup[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [loading, setLoading] = useState(true);
@@ -32,9 +39,14 @@ export default function AdminEducationPage() {
 
   async function load() {
     setLoading(true);
-    const res = await fetch("/api/admin/education");
-    const json = await res.json();
-    setItems(json.education ?? []);
+    const [eduRes, skillRes] = await Promise.all([
+      fetch("/api/admin/education"),
+      fetch("/api/admin/skill-groups"),
+    ]);
+    const eduJson = await eduRes.json();
+    const skillJson = await skillRes.json();
+    setItems(eduJson.education ?? []);
+    setSkillGroups(skillJson.groups ?? []);
     setLoading(false);
   }
 
@@ -51,13 +63,24 @@ export default function AdminEducationPage() {
       start_date: item.start_date ?? "",
       end_date: item.end_date ?? "",
       is_expected: item.is_expected,
+      include_in_resume: item.include_in_resume,
       sort_order: item.sort_order,
+      skill_ids: (item.education_skills ?? []).map((s) => s.skill_id),
     });
   }
 
   function startNew() {
     setEditingId("new");
     setForm(emptyForm);
+  }
+
+  function toggleSkill(skillId: string) {
+    setForm((prev) => ({
+      ...prev,
+      skill_ids: prev.skill_ids.includes(skillId)
+        ? prev.skill_ids.filter((id) => id !== skillId)
+        : [...prev.skill_ids, skillId],
+    }));
   }
 
   async function handleSave(e: React.FormEvent) {
@@ -146,6 +169,37 @@ export default function AdminEducationPage() {
             />
             End date is expected (not yet completed)
           </label>
+          <label>
+            <input
+              type="checkbox"
+              checked={form.include_in_resume}
+              onChange={(e) => setForm({ ...form, include_in_resume: e.target.checked })}
+              style={{ width: "auto", marginRight: 8 }}
+            />
+            Include in resume PDF
+          </label>
+
+          <div className="section">
+            <div className="muted" style={{ fontSize: "0.8rem", marginBottom: 8 }}>
+              Linked skills (used by the homepage skill tree):
+            </div>
+            {skillGroups.map((g) => (
+              <div key={g.id} style={{ marginBottom: 10 }}>
+                <div className="muted" style={{ fontSize: "0.75rem", marginBottom: 4 }}>{g.label}</div>
+                {g.skills.map((s) => (
+                  <label key={s.id} style={{ display: "inline-flex", alignItems: "center", gap: 4, marginRight: 12, marginTop: 4 }}>
+                    <input
+                      type="checkbox"
+                      checked={form.skill_ids.includes(s.id)}
+                      onChange={() => toggleSkill(s.id)}
+                      style={{ width: "auto" }}
+                    />
+                    {s.name}
+                  </label>
+                ))}
+              </div>
+            ))}
+          </div>
 
           <div className="section">
             <button type="submit" disabled={saving}>
@@ -165,6 +219,7 @@ export default function AdminEducationPage() {
         items.map((item) => (
           <div key={item.id} className="project-card">
             <strong>{item.institution}</strong>
+            {!item.include_in_resume && <span className="tag" style={{ marginLeft: 8 }}>excluded from resume</span>}
             <div className="muted">{item.degree}</div>
             <div className="section">
               <button onClick={() => startEdit(item)}>edit</button>{" "}

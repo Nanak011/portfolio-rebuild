@@ -39,6 +39,7 @@ app.post("/generate", requireAdminSecret, async (req, res) => {
     ...(req.body?.sections || {}),
   };
   const order = Array.isArray(req.body?.order) ? req.body.order : undefined;
+  const itemSelection = req.body?.itemSelection || {};
   let tmpDir;
 
   try {
@@ -53,10 +54,10 @@ app.post("/generate", requireAdminSecret, async (req, res) => {
     ] = await Promise.all([
       supabase.from("profile").select("*").limit(1).single(),
       sections.education
-        ? supabase.from("education").select("*").order("sort_order")
+        ? supabase.from("education").select("*").eq("include_in_resume", true).order("sort_order")
         : Promise.resolve({ data: [], error: null }),
       sections.experience
-        ? supabase.from("experience").select("*, experience_bullets(*)").order("sort_order")
+        ? supabase.from("experience").select("*, experience_bullets(*)").eq("include_in_resume", true).order("sort_order")
         : Promise.resolve({ data: [], error: null }),
       sections.skills
         ? supabase.from("skill_groups").select("*, skills(*)").order("sort_order")
@@ -65,7 +66,7 @@ app.post("/generate", requireAdminSecret, async (req, res) => {
         ? supabase.from("certification_groups").select("*, certifications(*)").order("sort_order")
         : Promise.resolve({ data: [], error: null }),
       sections.projects
-        ? supabase.from("projects").select("*, project_tags(*)").order("sort_order")
+        ? supabase.from("projects").select("*, project_tags(*)").eq("include_in_resume", true).order("sort_order")
         : Promise.resolve({ data: [], error: null }),
     ]);
 
@@ -92,15 +93,52 @@ app.post("/generate", requireAdminSecret, async (req, res) => {
       tags: (p.project_tags || []).map((t) => t.tag),
     }));
 
+    // 1b. Apply the per-generation item picker, if provided. Unlike
+    // `sections`/`order` (which toggle/reorder whole categories), this lets
+    // the admin pick exactly which specific items within a category go into
+    // THIS PDF, without touching each item's permanent include_in_resume flag.
+    const filteredEducation = itemSelection.educationIds
+      ? education.filter((e) => itemSelection.educationIds.includes(e.id))
+      : education;
+
+    const filteredExperience = itemSelection.experienceIds
+      ? experienceWithBullets.filter((e) => itemSelection.experienceIds.includes(e.id))
+      : experienceWithBullets;
+
+    const filteredProjects = itemSelection.projectIds
+      ? projects.filter((p) => itemSelection.projectIds.includes(p.id))
+      : projects;
+
+    const filteredSkillGroups = itemSelection.skillIds
+      ? skillGroups
+          .map((g) => ({ ...g, skills: g.skills.filter((s) => itemSelection.skillIds.includes(s.id)) }))
+          .filter((g) => g.skills.length > 0)
+      : skillGroups;
+
+    const filteredCertificationGroups = itemSelection.certificationIds
+      ? certificationGroups
+          .map((g) => ({
+            ...g,
+            certifications: g.certifications.filter((c) => itemSelection.certificationIds.includes(c.id)),
+          }))
+          .filter((g) => g.certifications.length > 0)
+      : certificationGroups;
+
+    const filteredExtraSections = itemSelection.entryIds
+      ? extraSections
+          .map((s) => ({ ...s, entries: s.entries.filter((e) => itemSelection.entryIds.includes(e.id)) }))
+          .filter((s) => s.entries.length > 0)
+      : extraSections;
+
     // 2. Build the .tex source.
     const texSource = buildTex({
       profile,
-      education,
-      experience: experienceWithBullets,
-      skillGroups,
-      certificationGroups,
-      projects,
-      extraSections,
+      education: filteredEducation,
+      experience: filteredExperience,
+      skillGroups: filteredSkillGroups,
+      certificationGroups: filteredCertificationGroups,
+      projects: filteredProjects,
+      extraSections: filteredExtraSections,
       sections,
       order,
     });

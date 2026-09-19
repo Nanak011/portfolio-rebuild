@@ -11,8 +11,8 @@ portfolio-rebuild/
 └── pdf-service/        ← Express + tectonic → deploy to Fly.io
 ```
 
-Everything below is one pass, start to finish. Work through it in order —
-each step depends on the one before it — but there's no "wait for phase 2"
+Everything below is one pass, start to finish. Work through it in order -
+each step depends on the one before it - but there's no "wait for phase 2"
 gate; it's all here.
 
 ---

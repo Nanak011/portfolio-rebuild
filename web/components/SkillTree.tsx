@@ -12,31 +12,42 @@ type ExperienceLite = {
   role_title: string;
   experience_skills?: { skill_id: string }[];
 };
+type EducationLite = {
+  id: string;
+  institution: string;
+  degree: string;
+  education_skills?: { skill_id: string }[];
+};
 
-function findUsage(skillId: string, projects: ProjectLite[], experience: ExperienceLite[]) {
+function findUsage(skillId: string, projects: ProjectLite[], experience: ExperienceLite[], education: EducationLite[]) {
   const projectMatches = projects.filter((p) =>
     p.project_skills?.some((ps) => ps.skill_id === skillId)
   );
   const experienceMatches = experience.filter((e) =>
     e.experience_skills?.some((es) => es.skill_id === skillId)
   );
-  return { projectMatches, experienceMatches };
+  const educationMatches = education.filter((ed) =>
+    ed.education_skills?.some((es) => es.skill_id === skillId)
+  );
+  return { projectMatches, experienceMatches, educationMatches };
 }
 
 function SkillRow({
   skill,
   projects,
   experience,
+  education,
   isLast,
 }: {
   skill: Skill;
   projects: ProjectLite[];
   experience: ExperienceLite[];
+  education: EducationLite[];
   isLast: boolean;
 }) {
   const [open, setOpen] = useState(false);
-  const { projectMatches, experienceMatches } = findUsage(skill.id, projects, experience);
-  const hasMatches = projectMatches.length > 0 || experienceMatches.length > 0;
+  const { projectMatches, experienceMatches, educationMatches } = findUsage(skill.id, projects, experience, education);
+  const hasMatches = projectMatches.length > 0 || experienceMatches.length > 0 || educationMatches.length > 0;
 
   // No linked project/role for this skill yet — render it as a plain,
   // non-expandable line rather than a dead-end toggle.
@@ -76,6 +87,14 @@ function SkillRow({
               </span>
             </div>
           ))}
+          {educationMatches.map((ed) => (
+            <div key={ed.id} className="tree-leaf">
+              <span className="tree-branch">│&nbsp;&nbsp;&nbsp;└──</span>
+              <span className="tree-leaf-label">
+                education → {ed.institution} ({ed.degree})
+              </span>
+            </div>
+          ))}
         </div>
       )}
     </div>
@@ -86,10 +105,12 @@ function GroupNode({
   group,
   projects,
   experience,
+  education,
 }: {
   group: SkillGroup;
   projects: ProjectLite[];
   experience: ExperienceLite[];
+  education: EducationLite[];
 }) {
   const [open, setOpen] = useState(true);
   const sorted = [...group.skills].sort((a, b) => a.sort_order - b.sort_order);
@@ -110,6 +131,7 @@ function GroupNode({
               skill={skill}
               projects={projects}
               experience={experience}
+              education={education}
               isLast={i === sorted.length - 1}
             />
           ))}
@@ -123,15 +145,17 @@ export default function SkillTree({
   skillGroups,
   projects,
   experience,
+  education,
 }: {
   skillGroups: SkillGroup[];
   projects: ProjectLite[];
   experience: ExperienceLite[];
+  education: EducationLite[];
 }) {
   return (
     <div className="tree">
       {skillGroups.map((g) => (
-        <GroupNode key={g.id} group={g} projects={projects} experience={experience} />
+        <GroupNode key={g.id} group={g} projects={projects} experience={experience} education={education} />
       ))}
     </div>
   );

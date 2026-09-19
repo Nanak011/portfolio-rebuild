@@ -2,16 +2,6 @@ import { requireAdmin } from "@/lib/supabase/requireAdmin";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
-async function syncSkills(supabase: any, educationId: string, skillIds: string[] | undefined) {
-  if (skillIds === undefined) return;
-  await supabase.from("education_skills").delete().eq("education_id", educationId);
-  if (skillIds.length > 0) {
-    await supabase
-      .from("education_skills")
-      .insert(skillIds.map((skill_id) => ({ education_id: educationId, skill_id })));
-  }
-}
-
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -23,20 +13,19 @@ export async function PATCH(
   const body = await req.json();
   const supabase = await createServerSupabase();
 
-  const { skill_ids, ...fields } = body;
-
   const { data, error } = await supabase
-    .from("education")
-    .update(fields)
+    .from("certifications")
+    .update({
+      name: body.name,
+      issuer: body.issuer || null,
+      credential_url: body.credential_url || null,
+    })
     .eq("id", id)
     .select()
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-
-  await syncSkills(supabase, id, skill_ids);
-
-  return NextResponse.json({ education: data });
+  return NextResponse.json({ certification: data });
 }
 
 export async function DELETE(
@@ -48,7 +37,7 @@ export async function DELETE(
 
   const { id } = await params;
   const supabase = await createServerSupabase();
-  const { error } = await supabase.from("education").delete().eq("id", id);
+  const { error } = await supabase.from("certifications").delete().eq("id", id);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });

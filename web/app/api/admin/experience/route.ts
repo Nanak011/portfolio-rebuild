@@ -42,7 +42,9 @@ export async function POST(req: NextRequest) {
       employment_type: body.employment_type ?? null,
       start_date: body.start_date || null,
       end_date: body.end_date || null,
+      include_in_resume: body.include_in_resume ?? true, 
       sort_order: body.sort_order ?? 0,
+      
     })
     .select()
     .single();

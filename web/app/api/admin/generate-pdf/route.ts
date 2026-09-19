@@ -8,7 +8,12 @@ export async function POST(req: NextRequest) {
   const unauthorized = await requireAdmin();
   if (unauthorized) return unauthorized;
 
-  const { label, sections, order } = await req.json().catch(() => ({ label: undefined, sections: undefined, order: undefined }));
+  const { label, sections, order, itemSelection } = await req.json().catch(() => ({
+    label: undefined,
+    sections: undefined,
+    order: undefined,
+    itemSelection: undefined,
+  }));
 
   const pdfServiceUrl = process.env.PDF_SERVICE_URL; // e.g. https://portfolio-pdf-service.fly.dev
   const pdfServiceSecret = process.env.PDF_SERVICE_SECRET;
@@ -26,7 +31,7 @@ export async function POST(req: NextRequest) {
       "Content-Type": "application/json",
       "x-admin-secret": pdfServiceSecret,
     },
-    body: JSON.stringify({ label, sections, order }),
+    body: JSON.stringify({ label, sections, order, itemSelection }),
   });
 
   const body = await res.json().catch(() => ({}));

@@ -21,6 +21,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <Link href="/admin/experience">experience</Link>
         <Link href="/admin/skills">skills</Link>
         <Link href="/admin/projects">projects</Link>
+        <Link href="/admin/certifications">certifications</Link>
         <Link href="/admin/stats">stats</Link>
         <Link href="/admin/sections">sections</Link>
         <Link href="/admin/resume">resume</Link>

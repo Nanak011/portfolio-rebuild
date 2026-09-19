@@ -19,9 +19,10 @@ export default async function HomePage() {
     { count: certCount },
     { data: extraSections },
     { data: stats },
+    { data: certificationGroups },
   ] = await Promise.all([
     supabase.from("profile").select("*").limit(1).single(),
-    supabase.from("education").select("*").order("sort_order"),
+    supabase.from("education").select("*, education_skills(skill_id)").order("sort_order"),
     supabase.from("experience").select("*, experience_bullets(*), experience_skills(skill_id)").order("sort_order"),
     supabase.from("skill_groups").select("*, skills(*)").order("sort_order"),
     supabase.from("projects").select("id, slug, title, project_skills(skill_id)").order("sort_order"),
@@ -31,6 +32,7 @@ export default async function HomePage() {
       .select("*, homepage_entries(*)")
       .order("sort_order"),
     supabase.from("homepage_stats").select("*").order("sort_order"),
+    supabase.from("certification_groups").select("*, certifications(*)").order("sort_order"),
   ]);
 
   const projectCount = projectsForTree?.length ?? 0;
@@ -42,7 +44,7 @@ export default async function HomePage() {
     <main className="page">
       <div className="hud-bar">
         <div className="ticks">{Array.from({ length: 6 }).map((_, i) => <span key={i} />)}</div>
-        <span className="hud-title">PORTFOLIO / OPERATOR PROFILE</span>
+        <span className="hud-title">PORTFOLIO</span>
         <div className="ticks">{Array.from({ length: 6 }).map((_, i) => <span key={i} />)}</div>
       </div>
 
@@ -183,14 +185,45 @@ export default async function HomePage() {
 
       <div className="section">
         <div className="section-label">
-          SKILLS / RECON <span className="rule" />
+          SKILLS <span className="rule" />
         </div>
         <SkillTree
           skillGroups={skillGroups ?? []}
           projects={projectsForTree ?? []}
           experience={experience ?? []}
+          education={education ?? []}
         />
       </div>
+
+      {certificationGroups && certificationGroups.length > 0 && (
+        <div className="section">
+          <div className="section-label">
+            CERTIFICATIONS <span className="rule" />
+          </div>
+          {certificationGroups.map((g: any) => (
+            <div key={g.id} className="certification-entry">
+              <div className="entry-title">{g.label}</div>
+              <div className="entry-role certification-list">
+                {g.certifications
+                  ?.sort((a: any, b: any) => a.sort_order - b.sort_order)
+                  .map((c: any, i: number) => (
+                    <span key={c.id} className="certification-item">
+                      {c.credential_url ? (
+                        <a href={c.credential_url} target="_blank">
+                          {c.issuer ? `${c.issuer}: ${c.name}` : c.name}
+                        </a>
+                      ) : c.issuer ? (
+                        `${c.issuer}: ${c.name}`
+                      ) : (
+                        c.name
+                      )}
+                    </span>
+                  ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {visibleSections.map((s: any) => (
         <div key={s.id} className="section">
@@ -225,10 +258,8 @@ export default async function HomePage() {
       ))}
 
       <div className="footer-strip">
-        <span><b>STATUS:</b> AVAILABLE</span>
-        <span><b>LOCATION:</b> {profile?.location}</span>
-        <span><b>CLEARANCE:</b> ISC2 CC</span>
-        <span><b>CONTACT:</b> {profile?.email}</span>
+        <span><b>EMAIL:</b> {profile?.email}</span>
+        <span><b>PHONE:</b> {profile?.phone}</span>
       </div>
     </main>
   );

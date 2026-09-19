@@ -249,6 +249,16 @@ a:hover {
 .entry li {
   margin-bottom: 6px;
 }
+.certification-entry {
+  margin-bottom: 24px;
+}
+.certification-list {
+  margin-top: 8px;
+  line-height: 1.7;
+}
+.certification-item {
+  display: block;
+}
 
 /* ---------- recon tree (expandable skill/usage explorer) ---------- */
 .tree {

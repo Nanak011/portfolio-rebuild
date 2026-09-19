@@ -90,7 +90,10 @@ ${bullets}
     .map((g) => {
       const items = (g.certifications || [])
         .sort((a, b) => a.sort_order - b.sort_order)
-        .map((c) => `        \\item ${c.issuer ? `\\textbf{${esc(c.issuer)}:} ` : ""}${esc(c.name)}`)
+        .map((c) => {
+          const nameTex = c.credential_url ? `\\href{${c.credential_url}}{${esc(c.name)}}` : esc(c.name);
+          return `        \\item ${c.issuer ? `\\textbf{${esc(c.issuer)}:} ` : ""}${nameTex}`;
+        })
         .join("\n");
       return `\\textbf{${esc(g.label)}}
     \\begin{itemize}[leftmargin=*, noitemsep]
