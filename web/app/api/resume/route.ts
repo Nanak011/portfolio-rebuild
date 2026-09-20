@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
+
 // Public route — no auth required. Uses the admin client to look up which
 // file is current and stream it directly (no signed URL / redirect).
 export async function GET() {
@@ -10,7 +11,7 @@ export async function GET() {
 
   const { data: current, error } = await supabase
     .from("resume_generations")
-    .select("storage_path, label, created_at")
+    .select("storage_path, label")
     .eq("is_current", true)
     .single();
 
@@ -38,12 +39,6 @@ export async function GET() {
       "Content-Type": "application/pdf",
       "Content-Disposition": 'inline; filename="resume.pdf"',
       "Cache-Control": "private, no-store, max-age=0, must-revalidate",
-      // Temporary debug headers — tells us exactly what the server thinks
-      // is "current" at the moment of the request. Remove once diagnosed.
-      "X-Debug-Storage-Path": current.storage_path,
-      "X-Debug-Label": encodeURIComponent(current.label ?? ""),
-      "X-Debug-Created-At": current.created_at ?? "unknown",
-      "X-Debug-Fetched-At": new Date().toISOString(),
     },
   });
 }
