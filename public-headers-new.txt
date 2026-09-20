@@ -1,0 +1,14 @@
+HTTP/1.1 200 OK
+Age: 0
+Cache-Control: private, no-store, max-age=0, must-revalidate
+Content-Disposition: inline; filename="resume.pdf"
+Content-Type: application/pdf
+Date: Sat, 19 Sep 2026 16:21:23 GMT
+Server: Vercel
+Strict-Transport-Security: max-age=63072000
+Vary: RSC, Next-Router-State-Tree, Next-Router-Prefetch
+X-Matched-Path: /api/resume
+X-Vercel-Cache: MISS
+X-Vercel-Id: bom1::iad1::qqnll-1789834883368-cbf56bac1b29
+Transfer-Encoding: chunked
+
