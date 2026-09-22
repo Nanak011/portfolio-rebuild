@@ -495,3 +495,33 @@ nav a {
   text-decoration: none;
   font-size: 0.8rem;
 }
+
+
+.binary-clock {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  z-index: 50;
+  pointer-events: none;
+  background: var(--bg);
+  padding: 6px;
+}
+.binary-clock-cols {
+  display: flex;
+  gap: 5px;
+}
+.binary-clock-col {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.binary-clock-dot {
+  width: 6px;
+  height: 6px;
+  display: block;
+  border: 1px solid var(--ink);
+  background: transparent;
+}
+.binary-clock-dot.on {
+  background: var(--ink);
+}
