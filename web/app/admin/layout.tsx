@@ -20,6 +20,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <Link href="/admin/education">education</Link>
         <Link href="/admin/experience">experience</Link>
         <Link href="/admin/skills">skills</Link>
+        <Link href="/admin/skill-fields">field matrix</Link>
         <Link href="/admin/projects">projects</Link>
         <Link href="/admin/certifications">certifications</Link>
         <Link href="/admin/stats">stats</Link>

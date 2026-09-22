@@ -8,21 +8,21 @@ export async function GET() {
 
   const supabase = await createServerSupabase();
   const { data, error } = await supabase
-    .from("experience")
-    .select("*, experience_bullets(*), experience_skills(skill_id)")
+    .from("skill_fields")
+    .select("*, skill_field_skills(skill_id)")
     .order("sort_order");
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ experience: data });
+  return NextResponse.json({ fields: data });
 }
 
-async function syncSkills(supabase: any, experienceId: string, skillIds: string[] | undefined) {
+async function syncSkills(supabase: any, fieldId: string, skillIds: string[] | undefined) {
   if (skillIds === undefined) return;
-  await supabase.from("experience_skills").delete().eq("experience_id", experienceId);
+  await supabase.from("skill_field_skills").delete().eq("field_id", fieldId);
   if (skillIds.length > 0) {
     await supabase
-      .from("experience_skills")
-      .insert(skillIds.map((skill_id) => ({ experience_id: experienceId, skill_id })));
+      .from("skill_field_skills")
+      .insert(skillIds.map((skill_id) => ({ field_id: fieldId, skill_id })));
   }
 }
 
@@ -34,18 +34,11 @@ export async function POST(req: NextRequest) {
   const supabase = await createServerSupabase();
 
   const { data, error } = await supabase
-    .from("experience")
+    .from("skill_fields")
     .insert({
-      company: body.company,
-      company_url: body.company_url || null,
-      location: body.location ?? null,
-      role_title: body.role_title,
-      employment_type: body.employment_type ?? null,
-      start_date: body.start_date || null,
-      end_date: body.end_date || null,
-      include_in_resume: body.include_in_resume ?? true, 
+      label: body.label,
+      percentage: body.percentage ?? 50,
       sort_order: body.sort_order ?? 0,
-      
     })
     .select()
     .single();
@@ -54,5 +47,5 @@ export async function POST(req: NextRequest) {
 
   await syncSkills(supabase, data.id, body.skill_ids);
 
-  return NextResponse.json({ experience: data });
+  return NextResponse.json({ field: data });
 }

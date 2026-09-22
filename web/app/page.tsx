@@ -1,9 +1,9 @@
 import { createServerSupabase } from "@/lib/supabase/server";
 import Link from "next/link";
-import RadarInstrument from "@/components/RadarInstrument";
+import SkillFieldMatrix from "@/components/SkillFieldMatrix";
 import SkillTree from "@/components/SkillTree";
-import { OpenLockIcon } from "@/components/ProjectIcons";
 import HudDial from "@/components/HudDial";
+import { OpenLockIcon } from "@/components/ProjectIcons";
 
 export const revalidate = 60;
 
@@ -20,6 +20,7 @@ export default async function HomePage() {
     { data: extraSections },
     { data: stats },
     { data: certificationGroups },
+    { data: skillFieldsRaw },
   ] = await Promise.all([
     supabase.from("profile").select("*").limit(1).single(),
     supabase.from("education").select("*, education_skills(skill_id)").order("sort_order"),
@@ -27,18 +28,20 @@ export default async function HomePage() {
     supabase.from("skill_groups").select("*, skills(*)").order("sort_order"),
     supabase.from("projects").select("id, slug, title, project_skills(skill_id)").order("sort_order"),
     supabase.from("certifications").select("*", { count: "exact", head: true }),
-    supabase
-      .from("homepage_sections")
-      .select("*, homepage_entries(*)")
-      .order("sort_order"),
+    supabase.from("homepage_sections").select("*, homepage_entries(*)").order("sort_order"),
     supabase.from("homepage_stats").select("*").order("sort_order"),
     supabase.from("certification_groups").select("*, certifications(*)").order("sort_order"),
+    supabase.from("skill_fields").select("*, skill_field_skills(skills(name))").order("sort_order"),
   ]);
 
   const projectCount = projectsForTree?.length ?? 0;
-  const visibleSections = (extraSections ?? []).filter(
-    (s: any) => s.homepage_entries?.length > 0
-  );
+  const visibleSections = (extraSections ?? []).filter((s: any) => s.homepage_entries?.length > 0);
+  const skillFields = (skillFieldsRaw ?? []).map((f: any) => ({
+    id: f.id,
+    label: f.label,
+    percentage: f.percentage,
+    skills: (f.skill_field_skills ?? []).map((s: any) => s.skills?.name).filter(Boolean),
+  }));
 
   return (
     <main className="page">
@@ -83,18 +86,34 @@ export default async function HomePage() {
             </a>
           </div>
         </div>
+
         <div className="radar-wrap">
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
-            <RadarInstrument
-              projects={projectCount}
-              certs={certCount ?? 0}
-              roles={experience?.length ?? 0}
-            />
-            <div style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--muted)", fontSize: "0.7rem" }}>
-              <span className="project-icon" style={{ width: 20, height: 20, margin: 0 }}>
-                <OpenLockIcon />
-              </span>
-              OPEN TO WORK
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
+            <SkillFieldMatrix fields={skillFields} />
+
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: 260 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--muted)", fontSize: "0.8rem" }}>
+                <span className="project-icon" style={{ width: 20, height: 20, margin: 0 }}>
+                  <OpenLockIcon />
+                </span>
+                OPEN TO WORK
+              </div>
+
+              <div
+                style={{
+                  border: "1px solid var(--ink)",
+                  padding: "8px 14px",
+                  fontFamily: "var(--font-display), monospace",
+                  fontSize: "0.9rem",
+                  lineHeight: 1.6,
+                }}
+              >
+                PRJ {String(projectCount).padStart(2, "0")}
+                <br />
+                CRT {String(certCount ?? 0).padStart(2, "0")}
+                <br />
+                EXP {String(experience?.length ?? 0).padStart(2, "0")}
+              </div>
             </div>
           </div>
         </div>
@@ -117,7 +136,6 @@ export default async function HomePage() {
         <div className="section-label">
           EXPERIENCE <span className="rule" />
         </div>
-
         <div className="manifest">
           <div className="manifest-row manifest-head">
             <div>ORGANIZATION</div>
@@ -125,39 +143,20 @@ export default async function HomePage() {
             <div>PERIOD</div>
           </div>
           {experience?.map((exp) => (
-            <div key={exp.id} className="manifest-row">
+            <Link
+              key={exp.id}
+              href={`/experience/${exp.id}`}
+              className="manifest-row"
+              style={{ textDecoration: "none", color: "inherit" }}
+            >
               <div>{exp.company}</div>
               <div>{exp.role_title}</div>
-              <div>{exp.start_date?.slice(0, 7)} → {exp.end_date?.slice(0, 7) ?? "now"}</div>
-            </div>
+              <div>
+                {exp.start_date?.slice(0, 7)} → {exp.end_date?.slice(0, 7) ?? "now"}
+              </div>
+            </Link>
           ))}
         </div>
-
-        {experience?.map((exp, i) => (
-          <div key={exp.id} className="entry">
-            <div className="entry-index">{String(i + 1).padStart(3, "0")}</div>
-            <div>
-              <div className="entry-head">
-                <div>
-                  <div className="entry-title">
-                    {exp.company} — {exp.role_title}
-                  </div>
-                  <div className="entry-role">{exp.employment_type}</div>
-                </div>
-                <div className="entry-date">
-                  {exp.start_date} – {exp.end_date ?? "PRESENT"}
-                </div>
-              </div>
-              <ul>
-                {exp.experience_bullets
-                  ?.sort((a: any, b: any) => a.sort_order - b.sort_order)
-                  .map((b: any) => (
-                    <li key={b.id}>{b.content}</li>
-                  ))}
-              </ul>
-            </div>
-          </div>
-        ))}
       </div>
 
       <div className="section">
@@ -203,11 +202,11 @@ export default async function HomePage() {
           {certificationGroups.map((g: any) => (
             <div key={g.id} className="certification-entry">
               <div className="entry-title">{g.label}</div>
-              <div className="entry-role certification-list">
+              <div className="certification-list">
                 {g.certifications
                   ?.sort((a: any, b: any) => a.sort_order - b.sort_order)
-                  .map((c: any, i: number) => (
-                    <span key={c.id} className="certification-item">
+                  .map((c: any) => (
+                    <div key={c.id} className="entry-role" style={{ marginBottom: 4 }}>
                       {c.credential_url ? (
                         <a href={c.credential_url} target="_blank">
                           {c.issuer ? `${c.issuer}: ${c.name}` : c.name}
@@ -217,7 +216,7 @@ export default async function HomePage() {
                       ) : (
                         c.name
                       )}
-                    </span>
+                    </div>
                   ))}
               </div>
             </div>
@@ -258,8 +257,12 @@ export default async function HomePage() {
       ))}
 
       <div className="footer-strip">
-        <span><b>EMAIL:</b> {profile?.email}</span>
-        <span><b>PHONE:</b> {profile?.phone}</span>
+        <span>
+          <b>EMAIL:</b> <a href={`mailto:${profile?.email}`}>{profile?.email}</a>
+        </span>
+        <span>
+          <b>PHONE:</b> {profile?.phone}
+        </span>
       </div>
     </main>
   );

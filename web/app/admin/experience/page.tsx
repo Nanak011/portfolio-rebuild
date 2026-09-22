@@ -6,6 +6,7 @@ type Bullet = { id: string; content: string; sort_order: number };
 type ExperienceItem = {
   id: string;
   company: string;
+  company_url: string | null;
   location: string | null;
   role_title: string;
   employment_type: string | null;
@@ -21,6 +22,7 @@ type SkillGroup = { id: string; label: string; skills: Skill[] };
 
 const emptyForm = {
   company: "",
+  company_url: "",
   location: "",
   role_title: "",
   employment_type: "",
@@ -61,6 +63,7 @@ export default function AdminExperiencePage() {
     setEditingId(item.id);
     setForm({
       company: item.company,
+      company_url: item.company_url ?? "",
       location: item.location ?? "",
       role_title: item.role_title,
       employment_type: item.employment_type ?? "",
@@ -142,6 +145,10 @@ export default function AdminExperiencePage() {
           <label>
             Company / Organization
             <input value={form.company} onChange={(e) => setForm({ ...form, company: e.target.value })} required />
+          </label>
+          <label>
+            Organization URL (their site or LinkedIn page)
+            <input value={form.company_url} onChange={(e) => setForm({ ...form, company_url: e.target.value })} />
           </label>
           <label>
             Location

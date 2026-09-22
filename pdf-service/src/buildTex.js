@@ -67,7 +67,8 @@ function buildTex(content) {
         .sort((a, b) => a.sort_order - b.sort_order)
         .map((b) => `    \\item ${esc(b.content)}`)
         .join("\n");
-      return `\\textbf{${esc(exp.company)}} \\hfill ${esc(exp.location)} \\\\
+      // return `\\textbf{${esc(exp.company)}} \\hfill ${esc(exp.location)} \\\\
+      return `\\textbf{${exp.company_url ? `\\href{${exp.company_url}}{${esc(exp.company)}}` : esc(exp.company)}} \\hfill ${esc(exp.location)} \\\\
 \\textit{${esc(exp.role_title)}${exp.employment_type ? ` (${esc(exp.employment_type)})` : ""}} \\hfill ${formatDateRange(exp.start_date, exp.end_date, false)}
 \\begin{itemize}[leftmargin=*, noitemsep]
 ${bullets}
